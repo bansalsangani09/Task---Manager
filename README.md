@@ -5,7 +5,19 @@
   <img src="https://img.shields.io/badge/build-passing-brightgreen?style=flat-square" alt="Build Passing"/>
   <img src="https://img.shields.io/badge/backend%20tests-62%2F62-brightgreen?style=flat-square" alt="Backend Tests"/>
   <img src="https://img.shields.io/badge/frontend%20tests-47%2F47-brightgreen?style=flat-square" alt="Frontend Tests"/>
+  <img src="https://img.shields.io/badge/TDD-Red%20→%20Green%20→%20Refactor-ff6b6b?style=flat-square" alt="TDD"/>
   <img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="License"/>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Java-17-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white" alt="Java 17"/>
+  <img src="https://img.shields.io/badge/Spring_Boot-3.5-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white" alt="Spring Boot"/>
+  <img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React 19"/>
+  <img src="https://img.shields.io/badge/Vite-8-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite 8"/>
+  <img src="https://img.shields.io/badge/PostgreSQL-16-4169E1?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL"/>
+  <img src="https://img.shields.io/badge/JWT-Auth-000000?style=for-the-badge&logo=json-web-tokens&logoColor=white" alt="JWT"/>
+  <img src="https://img.shields.io/badge/MUI-9-007FFF?style=for-the-badge&logo=mui&logoColor=white" alt="MUI"/>
+  <img src="https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker"/>
 </p>
 
 ---
@@ -18,10 +30,46 @@ The application features a dark luxury aesthetic, role-based access control (Sta
 
 ---
 
+## 🏆 Why This Project Stands Out
+
+<table>
+  <tr>
+    <td align="center" width="25%">
+      <h3>🧪 109 Tests</h3>
+      <p>100% pass rate across<br/>62 backend + 47 frontend<br/>assertions with strict TDD</p>
+    </td>
+    <td align="center" width="25%">
+      <h3>🔐 Enterprise Security</h3>
+      <p>Stateless JWT auth,<br/>BCrypt hashing, role-based<br/>access on both tiers</p>
+    </td>
+    <td align="center" width="25%">
+      <h3>🏗️ Production Architecture</h3>
+      <p>Feature-based packages,<br/>JPA Specifications, Flyway<br/>migrations, global error handling</p>
+    </td>
+    <td align="center" width="25%">
+      <h3>🚀 Deployed Live</h3>
+      <p>CI/CD with Vercel +<br/>Render + Neon PostgreSQL,<br/>Dockerized backend</p>
+    </td>
+  </tr>
+</table>
+
+---
+
 ## 🔗 Live Demo
 
-- **Frontend Application (Live)**: [LuxeDrive Web Client](https://car-dealership-inventory-system-rho.vercel.app/)
-- **Backend API Server (Live)**: [LuxeDrive API Base](https://car-dealership-inventory-system-5pci.onrender.com)
+| | Link |
+|:---|:---|
+| 🌐 **Frontend App** | [LuxeDrive Web Client](https://car-dealership-inventory-system-rho.vercel.app/) |
+| ⚡ **Backend API** | [LuxeDrive API Base](https://car-dealership-inventory-system-5pci.onrender.com) |
+
+### 🔑 Demo Credentials
+
+Use these credentials to explore the application without registering:
+
+| Role | Email | Password |
+|:---|:---|:---|
+| 👤 **Standard User** | `user@luxedrive.com` | `User@123` |
+| 🛡️ **Admin** | `admin@luxedrive.com` | `Admin@123` |
 
 > [!NOTE]
 > - **Frontend** is hosted and deployed on **Vercel**.
@@ -98,6 +146,102 @@ graph TD
 2. **Stateless JWT Security**: Spring Security intercepts HTTP requests, parses the JWT header, and injects authentication details into the security context. No server-side sessions are maintained.
 3. **Repository Pattern & JPA Specifications**: High-performance database operations with Spring Data JPA and dynamically constructed SQL criteria for search queries using `Specification<Vehicle>`.
 4. **Global Exception Handling**: Dedicated backend global advisor to catch custom and validation exceptions, mapping them to standard JSON error structures and HTTP status codes.
+
+### 🔐 JWT Authentication Flow
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant React as React Client
+    participant Axios as Axios Interceptor
+    participant Filter as JwtAuthFilter
+    participant Security as Spring Security
+    participant Controller as REST Controller
+    participant Service as Auth Service
+    participant DB as PostgreSQL
+
+    Note over User, DB: Registration Flow
+    User->>React: Fill register form
+    React->>Axios: POST /api/auth/register
+    Axios->>Filter: HTTP Request
+    Filter->>Controller: Public endpoint - pass through
+    Controller->>Service: registerUser(dto)
+    Service->>Service: BCrypt.hash(password)
+    Service->>DB: Save User entity
+    DB-->>Service: User saved
+    Service-->>React: 201 Created
+
+    Note over User, DB: Login Flow
+    User->>React: Enter credentials
+    React->>Axios: POST /api/auth/login
+    Axios->>Filter: HTTP Request
+    Filter->>Controller: Public endpoint - pass through
+    Controller->>Service: loginUser(dto)
+    Service->>DB: Find by email
+    DB-->>Service: User record
+    Service->>Service: BCrypt.verify(password)
+    Service->>Service: Generate JWT with claims
+    Service-->>React: 200 OK + JWT Token
+    React->>React: Store token in context
+
+    Note over User, DB: Authenticated Request
+    User->>React: Browse vehicles
+    React->>Axios: GET /api/vehicles
+    Axios->>Axios: Inject Bearer token header
+    Axios->>Filter: HTTP + Authorization header
+    Filter->>Filter: Extract & validate JWT
+    Filter->>Security: Set Authentication context
+    Security->>Controller: Authorized request
+    Controller->>Service: getVehicles()
+    Service->>DB: Query vehicles
+    DB-->>React: 200 OK + Vehicle list
+```
+
+### 🗄️ Database Schema
+
+```mermaid
+erDiagram
+    USERS {
+        bigint id PK
+        varchar name
+        varchar email UK
+        varchar password
+        varchar role
+        timestamp created_at
+    }
+
+    VEHICLES {
+        bigint id PK
+        varchar make
+        varchar model
+        integer year
+        varchar category
+        decimal price
+        integer quantity
+        varchar image_url
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    USERS ||--o{ VEHICLES : "manages (admin)"
+```
+
+### 🔄 TDD Workflow
+
+Every feature was built following this strict cycle:
+
+```mermaid
+flowchart LR
+    RED["🔴 RED\nWrite Failing Test"] --> GREEN["🟢 GREEN\nMinimal Implementation"]
+    GREEN --> REFACTOR["🔵 REFACTOR\nClean & Optimize"]
+    REFACTOR --> COMMIT["✅ COMMIT\nAll Tests Pass"]
+    COMMIT --> RED
+
+    style RED fill:#dc3545,stroke:#a71d2a,color:#fff
+    style GREEN fill:#198754,stroke:#146c43,color:#fff
+    style REFACTOR fill:#0d6efd,stroke:#0a58ca,color:#fff
+    style COMMIT fill:#6f42c1,stroke:#59359a,color:#fff
+```
 
 ---
 
@@ -333,6 +477,20 @@ The backend REST API is secure, mapping authorization permissions to user roles.
    - Admin routes (`/admin/vehicles`) are locked specifically to users with the `ADMIN` role.
    - Database operations (write/edit/delete/restock) verify the role claims on the server-side, preventing unauthorized REST calls.
 
+### Security Matrix
+
+| Endpoint | Public | User | Admin |
+|:---|:---:|:---:|:---:|
+| `POST /api/auth/register` | ✅ | ✅ | ✅ |
+| `POST /api/auth/login` | ✅ | ✅ | ✅ |
+| `GET /api/vehicles` | ❌ | ✅ | ✅ |
+| `GET /api/vehicles/search` | ❌ | ✅ | ✅ |
+| `POST /api/vehicles/{id}/purchase` | ❌ | ✅ | ✅ |
+| `POST /api/vehicles` | ❌ | ❌ | ✅ |
+| `PUT /api/vehicles/{id}` | ❌ | ❌ | ✅ |
+| `DELETE /api/vehicles/{id}` | ❌ | ❌ | ✅ |
+| `POST /api/vehicles/{id}/restock` | ❌ | ❌ | ✅ |
+
 ---
 
 ## 🧪 Testing
@@ -475,7 +633,7 @@ This project was built solo using an AI-assisted, strict TDD workflow. AI tools 
    - Renamed the project from an earlier working name ("AutoVault") to **LuxeDrive** across pages, layouts, and tests, and applied the glassmorphism visual overhaul (backdrop-filter blur, translucent MUI overrides) to showcase the new background media.
    - Diagnosed and fixed flaky tests introduced by the media components — e.g. asserting on the `element.muted` DOM property instead of the attribute (since React binds `muted` as a property, not an attribute), and increasing timeouts on slower CI/VM test runs.
 
-### What I Did Yourself
+### What I Did Myself
 - Reviewed, ran, and understood every AI-suggested change before committing it — no code was merged without being verified against the test suite.
 - Made all product and architecture decisions (feature scope, role-based access model, package structure, styling direction, rebrand to LuxeDrive).
 - Debugged failing/flaky tests and decided on the actual fixes to apply (AI proposed candidate fixes; I chose and validated the correct one in context).
